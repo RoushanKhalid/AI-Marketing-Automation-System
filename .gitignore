@@ -1,0 +1,33 @@
+# Environment secrets
+.env
+
+# Database files
+*.db
+campaigns.db
+
+# Logs
+*.log
+app.log
+
+# Python cache & build files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE / Editors
+.vscode/
+.idea/
+.project
+.settings/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

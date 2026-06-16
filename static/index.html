@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Marketing Automation</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f1117;--card:#1a1d27;--card2:#22263a;--card3:#1e2235;
+      --accent:#6c63ff;--accent2:#ff6584;--accent3:#38bdf8;
+      --green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--purple:#a78bfa;
+      --text:#e2e8f0;--muted:#94a3b8;--border:#2d3148;
+      --phone-bg:#1c1c1e;--bubble-in:#2d3148;--radius:14px;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* ── NAV ── */
+    nav{display:flex;align-items:center;gap:12px;padding:14px 28px;background:var(--card);
+        border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+        box-shadow:0 2px 12px rgba(0,0,0,.4)}
+    .logo{font-size:1.25rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px}
+    .logo span{color:var(--accent2)}
+    .nav-center{display:flex;gap:4px;margin-left:24px}
+    .nav-btn{padding:6px 16px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;
+             border:1px solid transparent;background:transparent;color:var(--muted);transition:all .2s}
+    .nav-btn:hover{background:var(--card2);color:var(--text)}
+    .nav-btn.active{background:rgba(108,99,255,.18);color:var(--accent);border-color:rgba(108,99,255,.35)}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .pill{padding:4px 12px;border-radius:999px;font-size:.73rem;font-weight:600;
+          background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3);
+          display:flex;align-items:center;gap:5px}
+    .pill.off{background:rgba(239,68,68,.12);color:var(--red);border-color:rgba(239,68,68,.3)}
+    .pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;
+              animation:pulse 2s infinite}
+    .pill.off .pill-dot{animation:none}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* ── STATS BAR ── */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+           padding:16px 28px;max-width:1700px;margin:0 auto}
+    .sc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+        padding:14px 18px;display:flex;align-items:center;gap:14px;transition:border-color .2s}
+    .sc:hover{border-color:rgba(108,99,255,.4)}
+    .sc-icon{font-size:1.6rem;line-height:1}
+    .sc .n{font-size:1.7rem;font-weight:700;line-height:1}
+    .sc .l{font-size:.75rem;color:var(--muted);margin-top:3px}
+    .sc.tot .n{color:var(--text)} .sc.pen .n{color:var(--yellow)}
+    .sc.pro .n{color:var(--purple)} .sc.snt .n{color:var(--green)} .sc.fai .n{color:var(--red)}
+
+    /* ── MAIN LAYOUT ── */
+    .layout{display:grid;grid-template-columns:380px 1fr 290px;gap:20px;
+            padding:0 28px 28px;max-width:1700px;margin:0 auto}
+    @media(max-width:1200px){.layout{grid-template-columns:340px 1fr}.col-phone{display:none}}
+    @media(max-width:800px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+
+    /* ── CARD ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+    .card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .card-hdr h2{font-size:.82rem;font-weight:600;color:var(--muted);text-transform:uppercase;
+                 letter-spacing:.08em;display:flex;align-items:center;gap:7px}
+
+    /* ── FORM ── */
+    .fg{margin-bottom:13px}
+    label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:5px;font-weight:500}
+    input,textarea,select{width:100%;padding:9px 12px;background:var(--card2);
+                          border:1px solid var(--border);border-radius:8px;color:var(--text);
+                          font-size:.85rem;outline:none;font-family:inherit;transition:border-color .2s}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);
+                                            box-shadow:0 0 0 3px rgba(108,99,255,.12)}
+    textarea{resize:vertical;min-height:68px}
+    .char-count{float:right;font-size:.72rem;color:var(--muted);margin-top:2px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;
+         border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;
+         background:var(--accent);color:#fff;width:100%;transition:all .2s}
+    .btn:hover{background:#5a52e0;transform:translateY(-1px)}
+    .btn:active{transform:none}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn-sm{width:auto;padding:6px 14px;font-size:.78rem}
+    .btn-ghost{background:var(--card2);color:var(--muted);border:1px solid var(--border)}
+    .btn-ghost:hover{background:var(--card3);color:var(--text)}
+    .btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+    .btn-danger:hover{background:rgba(239,68,68,.25)}
+    .notice{margin-top:10px;padding:9px 13px;border-radius:8px;font-size:.81rem;display:none}
+    .notice.ok{background:rgba(34,197,94,.08);color:var(--green);
+               border:1px solid rgba(34,197,94,.25);display:block}
+    .notice.err{background:rgba(239,68,68,.08);color:var(--red);
+                border:1px solid rgba(239,68,68,.25);display:block}
+    .notice.info{background:rgba(108,99,255,.08);color:var(--purple);
+                 border:1px solid rgba(108,99,255,.25);display:block}
+
+    /* ── TABLE ── */
+    .tw{overflow-x:auto;margin:-4px}
+    table{width:100%;border-collapse:collapse;font-size:.82rem}
+    th{color:var(--muted);font-weight:600;padding:7px 10px;text-align:left;
+       border-bottom:1px solid var(--border);white-space:nowrap;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+    td{padding:9px 10px;border-bottom:1px solid rgba(45,49,72,.45);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr.row-hover:hover td{background:rgba(108,99,255,.05)}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;
+           border-radius:999px;font-size:.7rem;font-weight:700;letter-spacing:.03em}
+    .badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+    .badge.pending{background:rgba(245,158,11,.12);color:var(--yellow)}
+    .badge.processing{background:rgba(167,139,250,.15);color:var(--purple);animation:badge-pulse 1.5s infinite}
+    .badge.sent{background:rgba(34,197,94,.12);color:var(--green)}
+    .badge.failed{background:rgba(239,68,68,.12);color:var(--red)}
+    @keyframes badge-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+    .empty-row{text-align:center;color:var(--muted);padding:32px 0;font-size:.85rem}
+    .action-btns{display:flex;gap:5px}
+    .icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
+              background:var(--card2);color:var(--muted);cursor:pointer;font-size:.78rem;
+              display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .icon-btn:hover{background:var(--card3);color:var(--text)}
+    .icon-btn.del:hover{background:rgba(239,68,68,.15);color:var(--red);border-color:rgba(239,68,68,.3)}
+    .icon-btn.view:hover{background:rgba(108,99,255,.15);color:var(--accent);border-color:rgba(108,99,255,.3)}
+
+    /* ── TABS ── */
+    .tabs{display:flex;gap:2px;background:var(--card2);padding:3px;border-radius:9px;margin-bottom:14px}
+    .tab{flex:1;padding:6px;border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;
+         border:none;background:transparent;color:var(--muted);transition:all .2s;text-align:center}
+    .tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+    /* ── LIVE FEED ── */
+    .feed{max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+    .feed::-webkit-scrollbar{width:3px}
+    .feed::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .feed-item{padding:9px 12px;border-radius:8px;background:var(--card2);
+               font-size:.79rem;animation:slide-in .3s ease both;cursor:pointer;
+               border-left:3px solid var(--accent);transition:background .15s}
+    .feed-item:hover{background:var(--card3)}
+    .feed-item.fail{border-left-color:var(--red)}
+    .feed-item.proc{border-left-color:var(--purple)}
+    .feed-item b{color:var(--text);display:block;margin-bottom:2px;font-size:.8rem}
+    .feed-item span{color:var(--muted)}
+    .feed-empty{color:var(--muted);font-size:.82rem;text-align:center;padding:18px}
+    @keyframes slide-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+    /* ── PHONE MOCKUP ── */
+    .col-phone{display:flex;flex-direction:column;align-items:center;gap:12px}
+    .phone-label{font-size:.72rem;color:var(--muted);font-weight:600;
+                 text-transform:uppercase;letter-spacing:.1em}
+    .phone{width:265px;background:var(--phone-bg);border-radius:40px;
+           border:3px solid #3a3a3c;overflow:hidden;
+           box-shadow:0 0 0 1px #111,0 30px 80px rgba(0,0,0,.6)}
+    .p-notch{height:26px;background:var(--phone-bg);display:flex;
+             align-items:center;justify-content:center;padding-top:4px}
+    .p-notch-inner{width:90px;height:18px;background:#111;border-radius:0 0 12px 12px;
+                   display:flex;align-items:center;justify-content:center;gap:5px}
+    .cam{width:7px;height:7px;border-radius:50%;background:#222;border:1px solid #333}
+    .p-sb{display:flex;justify-content:space-between;padding:2px 16px 0;
+          font-size:.6rem;color:#fff;opacity:.6}
+    .p-hdr{background:#1c1c1e;padding:8px 13px 10px;
+           border-bottom:1px solid #2a2a2c;display:flex;align-items:center;gap:9px}
+    .p-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;
+          background:linear-gradient(135deg,var(--accent),var(--accent2));
+          display:flex;align-items:center;justify-content:center;font-size:.9rem}
+    .p-cn .nm{font-size:.8rem;font-weight:600;color:#fff}
+    .p-cn .sub{font-size:.66rem;color:#8e8e93}
+    .p-body{height:400px;overflow-y:auto;padding:10px 10px 12px;
+            display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+    .p-body::-webkit-scrollbar{width:2px}
+    .p-body::-webkit-scrollbar-thumb{background:#3a3a3c;border-radius:2px}
+    .bw{display:flex;flex-direction:column}
+    .bw.in{align-items:flex-start}.bw.out{align-items:flex-end}
+    .bubble{max-width:86%;padding:8px 11px;border-radius:16px;font-size:.76rem;
+            line-height:1.5;animation:pop .3s cubic-bezier(.34,1.56,.64,1) both}
+    .bubble.in{background:var(--bubble-in);color:var(--text);border-bottom-left-radius:3px}
+    .bubble.out{background:var(--accent);color:#fff;border-bottom-right-radius:3px}
+    .bubble img{width:100%;border-radius:8px;margin-top:6px;display:block;cursor:zoom-in}
+    .bt{font-size:.6rem;color:#8e8e93;margin-top:2px;padding:0 3px}
+    @keyframes pop{from{transform:scale(.75);opacity:0}to{transform:scale(1);opacity:1}}
+    .typing-bub{background:var(--bubble-in);border-radius:16px;border-bottom-left-radius:3px;
+                padding:8px 11px;display:inline-flex}
+    .dots{display:flex;align-items:center;gap:3px}
+    .dots span{width:5px;height:5px;border-radius:50%;background:var(--muted);
+               animation:bou 1.2s infinite}
+    .dots span:nth-child(2){animation-delay:.2s}
+    .dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bou{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+    .p-ibar{background:#1c1c1e;border-top:1px solid #2a2a2c;
+            padding:8px 12px;display:flex;align-items:center;gap:6px}
+    .fake-in{flex:1;background:#2c2c2e;border-radius:18px;padding:6px 12px;
+             font-size:.72rem;color:#636366}
+    .sbtn{width:26px;height:26px;border-radius:50%;background:var(--accent);
+          display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem}
+
+    /* ── MODAL ── */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;
+             justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s}
+    .overlay.open{opacity:1;pointer-events:all}
+    .mbox{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+          padding:24px;max-width:540px;width:93%;transform:scale(.92);
+          transition:transform .2s;max-height:88vh;overflow-y:auto}
+    .overlay.open .mbox{transform:scale(1)}
+    .mbox-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .mbox h3{font-size:1rem;font-weight:700;line-height:1.3}
+    .mbox-meta{font-size:.75rem;color:var(--muted);margin-top:3px}
+    .mbox img{width:100%;border-radius:9px;margin:10px 0;
+              border:1px solid var(--border)}
+    .mbox-text{font-size:.84rem;color:var(--text);line-height:1.7;
+               white-space:pre-wrap;background:var(--card2);
+               padding:13px;border-radius:8px;border:1px solid var(--border)}
+    .mbox-url{font-size:.72rem;color:var(--muted);margin-top:8px;word-break:break-all}
+    .mbox-url a{color:var(--accent3);text-decoration:none}
+    .mbox-url a:hover{text-decoration:underline}
+    .mclose{background:var(--card2);border:1px solid var(--border);color:var(--muted);
+            border-radius:6px;padding:5px 12px;cursor:pointer;font-size:.8rem;
+            white-space:nowrap;flex-shrink:0;transition:all .2s}
+    .mclose:hover{color:var(--text)}
+
+    /* ── CONFIRM DIALOG ── */
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;
+                     align-items:center;justify-content:center;z-index:1000;
+                     opacity:0;pointer-events:none;transition:opacity .15s}
+    .confirm-overlay.open{opacity:1;pointer-events:all}
+    .confirm-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+                 padding:22px;max-width:360px;width:90%;transform:scale(.9);transition:transform .15s}
+    .confirm-overlay.open .confirm-box{transform:scale(1)}
+    .confirm-box h4{font-size:.95rem;margin-bottom:8px}
+    .confirm-box p{font-size:.82rem;color:var(--muted);margin-bottom:18px;line-height:1.55}
+    .confirm-actions{display:flex;gap:8px;justify-content:flex-end}
+
+    /* ── TOAST ── */
+    .toast-wrap{position:fixed;bottom:20px;right:20px;z-index:2000;
+                display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .toast{padding:10px 16px;border-radius:9px;font-size:.82rem;font-weight:500;
+           color:#fff;animation:toast-in .3s ease both;max-width:300px;
+           display:flex;align-items:center;gap:8px;
+           box-shadow:0 4px 20px rgba(0,0,0,.4)}
+    .toast.ok{background:#16a34a}
+    .toast.err{background:#dc2626}
+    .toast.info{background:var(--accent)}
+    .toast.warn{background:#d97706}
+    @keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+    @keyframes toast-out{to{opacity:0;transform:translateX(20px)}}
+
+    /* ── MISC ── */
+    .divider{height:1px;background:var(--border);margin:14px 0}
+    .text-muted{color:var(--muted)}
+    .spin{display:inline-block;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .col-gap{display:flex;flex-direction:column;gap:18px}
+    .progress-bar{height:3px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+                   border-radius:3px;transition:width .4s ease;animation:shimmer 1.5s infinite}
+    @keyframes shimmer{0%{opacity:.7}50%{opacity:1}100%{opacity:.7}}
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ───────────────────────────────────────────────────────── -->
+<nav>
+  <div class="logo">📣 AI<span>Marketing</span></div>
+  <div class="nav-center">
+    <button class="nav-btn active" onclick="showTab('dashboard')" id="navDash">Dashboard</button>
+    <button class="nav-btn" onclick="showTab('campaigns')" id="navCamp">Campaigns</button>
+    <button class="nav-btn" onclick="showTab('messages')" id="navMsgs">Messages</button>
+  </div>
+  <div class="nav-right">
+    <div class="pill off" id="wsPill"><div class="pill-dot"></div><span id="wsLabel">Connecting…</span></div>
+  </div>
+</nav>
+
+<!-- ── STATS ─────────────────────────────────────────────────────── -->
+<div class="stats" id="statsBar">
+  <div class="sc tot">
+    <div class="sc-icon">📋</div>
+    <div><div class="n" id="sTot">0</div><div class="l">Total Campaigns</div></div>
+  </div>
+  <div class="sc pen">
+    <div class="sc-icon">⏳</div>
+    <div><div class="n" id="sPen">0</div><div class="l">Pending</div></div>
+  </div>
+  <div class="sc snt">
+    <div class="sc-icon">✅</div>
+    <div><div class="n" id="sSnt">0</div><div class="l">Sent</div></div>
+  </div>
+  <div class="sc fai">
+    <div class="sc-icon">❌</div>
+    <div><div class="n" id="sFai">0</div><div class="l">Failed</div></div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ───────────────────────────────────────────── -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     DASHBOARD TAB
+     ════════════════════════════════════════════════════════════════ -->
+<div id="tabDashboard" class="layout" style="padding-top:20px">
+
+  <!-- COL 1 – NEW CAMPAIGN FORM -->
+  <div>
+    <div class="card">
+      <div class="card-hdr"><h2>🚀 New Campaign</h2></div>
+
+      <div class="fg">
+        <label>Campaign Name</label>
+        <input id="fName" placeholder="e.g. Summer Sale Launch" maxlength="255"
+               oninput="updateChar('fName','charName',255)"/>
+        <div class="char-count"><span id="charName">0</span>/255</div>
+      </div>
+
+      <div class="fg">
+        <label>AI Prompt</label>
+        <textarea id="fPrompt" placeholder="Describe what you want to promote…" maxlength="2000"
+                  oninput="updateChar('fPrompt','charPrompt',2000)"></textarea>
+        <div class="char-count"><span id="charPrompt">0</span>/2000</div>
+      </div>
+
+      <div class="fg">
+        <label>Phone Number (E.164)</label>
+        <input id="fPhone" placeholder="+8801913828774" maxlength="16"/>
+      </div>
+
+      <div class="fg">
+        <label>Schedule Date &amp; Time (local)</label>
+        <input id="fTime" type="datetime-local"/>
+      </div>
+
+      <button class="btn" id="subBtn" onclick="createCampaign()">
+        📤 Schedule Campaign
+      </button>
+      <div class="notice" id="formMsg"></div>
+    </div>
+
+    <!-- QUICK TIPS -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-hdr"><h2>💡 Quick Tips</h2></div>
+      <div style="font-size:.8rem;color:var(--muted);line-height:1.8">
+        <div>📌 Phone must be E.164 format: <code style="color:var(--accent3)">+8801913828774</code></div>
+        <div style="margin-top:4px">⏱ Scheduler checks every 30 seconds</div>
+        <div style="margin-top:4px">🔁 Only <b style="color:var(--yellow)">pending</b> or
+          <b style="color:var(--red)">failed</b> campaigns can be deleted</div>
+        <div style="margin-top:4px">📱 Phone preview updates live when messages are dispatched</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COL 2 – CAMPAIGNS TABLE + LIVE FEED -->
+  <div class="col-gap">
+    <div class="card">
+      <div class="card-hdr">
+        <h2>📋 Recent Campaigns</h2>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-sm btn-ghost" onclick="loadCampaigns()">↻ Refresh</button>
+          <button class="btn btn-sm btn-ghost" onclick="showTab('campaigns')">View All →</button>
+        </div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Phone</th><th>Scheduled</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dashTbl">
+            <tr><td colspan="6"><div class="empty-row">No campaigns yet.</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <h2>⚡ Live Dispatch Feed</h2>
+        <button class="btn btn-sm btn-ghost" onclick="clearFeed()">✕ Clear</button>
+      </div>
+      <div class="feed" id="feed">
+        <div class="feed-empty">Waiting for dispatched messages…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COL 3 – PHONE MOCKUP -->
+  <div class="col-phone">
+    <div class="phone-label">📱 Live Preview</div>
+    <div class="phone">
+      <div style="background:#1c1c1e;padding-top:6px">
+        <div class="p-notch">
+          <div class="p-notch-inner"><div class="cam"></div></div>
+        </div>
+      </div>
+      <div class="p-sb"><span id="ptime">9:41</span><span>●●  WiFi 🔋</span></div>
+      <div class="p-hdr">
+        <div class="p-av">📣</div>
+        <div class="p-cn">
+          <div class="nm" id="pName">Marketing Bot</div>
+          <div class="sub" id="pNum">+880 ··· ···</div>
+        </div>
+      </div>
+      <div class="p-body" id="pBody">
+        <div class="bw in">
+          <div class="bubble in">👋 Hi! Schedule a campaign and your AI-generated message will appear here in real time.</div>
+          <div class="bt">Now</div>
+        </div>
+      </div>
+      <div class="p-ibar">
+        <div class="fake-in">iMessage</div>
+        <div class="sbtn">↑</div>
+      </div>
+    </div>
+    <div style="font-size:.72rem;color:var(--muted);text-align:center;max-width:240px;line-height:1.55;margin-top:4px">
+      Live updates arrive via WebSocket when the scheduler dispatches a campaign.
+    </div>
+  </div>
+
+</div>
+<!-- /tabDashboard -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     CAMPAIGNS TAB
+     ════════════════════════════════════════════════════════════════ -->
+<div id="tabCampaigns" style="display:none;padding:0 28px 28px;max-width:1700px;margin:0 auto">
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-hdr">
+      <h2>📋 All Campaigns</h2>
+      <div style="display:flex;gap:7px;align-items:center">
+        <!-- Filter -->
+        <select id="filterStatus" onchange="applyFilter()" style="width:auto;padding:6px 10px;font-size:.78rem">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="sent">Sent</option>
+          <option value="failed">Failed</option>
+        </select>
+        <button class="btn btn-sm btn-ghost" onclick="loadCampaigns()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Prompt (preview)</th>
+            <th>Scheduled</th>
+            <th>Status</th>
+            <th style="text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="campTbl">
+          <tr><td colspan="7"><div class="empty-row">No campaigns yet.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:12px;font-size:.75rem;color:var(--muted)" id="campCount"></div>
+  </div>
+
+</div>
+<!-- /tabCampaigns -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     MESSAGES TAB
+     ════════════════════════════════════════════════════════════════ -->
+<div id="tabMessages" style="display:none;padding:0 28px 28px;max-width:1700px;margin:0 auto">
+
+  <div style="margin-top:20px;display:grid;grid-template-columns:1fr 290px;gap:20px">
+
+    <div class="card">
+      <div class="card-hdr">
+        <h2>📨 Sent Messages</h2>
+        <button class="btn btn-sm btn-ghost" onclick="loadSentMessages()">↻ Refresh</button>
+      </div>
+      <div id="msgList" style="display:flex;flex-direction:column;gap:10px">
+        <div class="empty-row">No sent messages yet.</div>
+      </div>
+    </div>
+
+    <!-- Phone always visible in messages tab -->
+    <div class="col-phone" style="display:flex">
+      <div class="phone-label">📱 Live Preview</div>
+      <div class="phone">
+        <div style="background:#1c1c1e;padding-top:6px">
+          <div class="p-notch">
+            <div class="p-notch-inner"><div class="cam"></div></div>
+          </div>
+        </div>
+        <div class="p-sb"><span id="ptime2">9:41</span><span>●●  WiFi 🔋</span></div>
+        <div class="p-hdr">
+          <div class="p-av">📣</div>
+          <div class="p-cn">
+            <div class="nm" id="pName2">Marketing Bot</div>
+            <div class="sub" id="pNum2">+880 ··· ···</div>
+          </div>
+        </div>
+        <div class="p-body" id="pBody2">
+          <div class="bw in">
+            <div class="bubble in">👋 Select a message from the list to preview it here.</div>
+            <div class="bt">Now</div>
+          </div>
+        </div>
+        <div class="p-ibar">
+          <div class="fake-in">iMessage</div>
+          <div class="sbtn">↑</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- /tabMessages -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     CAMPAIGN DETAIL MODAL
+     ════════════════════════════════════════════════════════════════ -->
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="mbox">
+    <div class="mbox-hdr">
+      <div>
+        <h3 id="mTitle"></h3>
+        <div class="mbox-meta" id="mMeta"></div>
+      </div>
+      <button class="mclose" onclick="closeModal()">✕ Close</button>
+    </div>
+    <img id="mImg" src="" alt="Campaign image"
+         onerror="this.style.display='none'" style="display:none"/>
+    <div class="mbox-text" id="mText" style="display:none"></div>
+    <div class="mbox-url" id="mUrl" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CONFIRM DELETE DIALOG
+     ════════════════════════════════════════════════════════════════ -->
+<div class="confirm-overlay" id="confirmDlg">
+  <div class="confirm-box">
+    <h4>🗑 Delete Campaign?</h4>
+    <p id="confirmMsg">This action cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-sm btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-sm btn-danger" id="confirmOk" onclick="executeDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let ws = null, reconnTimer = null;
+let allCampaigns = [];          // master list from last /campaigns fetch
+let pendingDeleteId = null;     // campaign id waiting for confirm dialog
+const dispatchCache = {};       // campaign_id → dispatch payload (for modal / phone)
+const shownInPhone = new Set(); // track which campaigns shown in phone this session
+
+// ═══════════════════════════════════════════════════════════════════
+// NAV TABS
+// ═══════════════════════════════════════════════════════════════════
+const TABS = {
+  dashboard: {el:'tabDashboard', nav:'navDash'},
+  campaigns: {el:'tabCampaigns', nav:'navCamp'},
+  messages:  {el:'tabMessages',  nav:'navMsgs'},
+};
+let currentTab = 'dashboard';
+
+function showTab(name) {
+  Object.entries(TABS).forEach(([k,v]) => {
+    document.getElementById(v.el).style.display  = k === name ? '' : 'none';
+    document.getElementById(v.nav).classList.toggle('active', k === name);
+  });
+  currentTab = name;
+  if (name === 'campaigns') renderCampTable();
+  if (name === 'messages')  loadSentMessages();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// WEBSOCKET
+// ═══════════════════════════════════════════════════════════════════
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+  ws.onopen = () => {
+    setPill(true);
+    clearTimeout(reconnTimer);
+    replaySentOnConnect();
+  };
+  ws.onclose = () => {
+    setPill(false);
+    reconnTimer = setTimeout(connectWS, 3000);
+  };
+  ws.onerror = () => ws.close();
+  ws.onmessage = e => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.type === 'message_sent')  onDispatch(d);
+      if (d.type === 'status_update') onStatusUpdate(d);
+    } catch(_) {}
+  };
+}
+
+function setPill(ok) {
+  const p = document.getElementById('wsPill');
+  const l = document.getElementById('wsLabel');
+  p.className = 'pill' + (ok ? '' : ' off');
+  l.textContent = ok ? 'Live' : 'Disconnected';
+}
+
+// On connect, fetch all sent campaigns and replay any new ones into the phone
+async function replaySentOnConnect() {
+  try {
+    const res = await fetch('/campaigns/sent');
+    if (!res.ok) return;
+    const list = await res.json();
+    if (!Array.isArray(list) || !list.length) return;
+
+    // Cache all for modal access
+    list.forEach(c => {
+      if (c.generated_text && c.image_url) {
+        dispatchCache[c.campaign_id] = {
+          campaign_id:    c.campaign_id,
+          campaign_name:  c.campaign_name,
+          phone:          c.phone,
+          generated_text: c.generated_text,
+          image_url:      c.image_url,
+        };
+      }
+    });
+
+    // Show the most recent one in the phone if not already shown this session
+    const latest = list.find(c => c.generated_text && c.image_url);
+    if (latest && !shownInPhone.has(latest.campaign_id)) {
+      renderPhoneBubble(dispatchCache[latest.campaign_id], false);
+    }
+  } catch(_) {}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// REAL-TIME EVENT HANDLERS
+// ═══════════════════════════════════════════════════════════════════
+function onDispatch(d) {
+  dispatchCache[d.campaign_id] = d;
+  renderPhoneBubble(d, true);   // animated
+  addFeedItem(d, 'sent');
+  // Update campaign in local list + re-render tables
+  updateLocalCampaign(d.campaign_id, {status:'sent',
+    generated_text: d.generated_text, image_url: d.image_url});
+  renderDashTable();
+  if (currentTab === 'campaigns') renderCampTable();
+  if (currentTab === 'messages')  loadSentMessages();
+  updateStats();
+  toast(`✅ "${h(d.campaign_name)}" dispatched!`, 'ok');
+}
+
+function onStatusUpdate(d) {
+  updateLocalCampaign(d.campaign_id, {status: d.status});
+  renderDashTable();
+  if (currentTab === 'campaigns') renderCampTable();
+  updateStats();
+  if (d.status === 'processing') {
+    addFeedItem(d, 'proc');
+    toast(`⚙ Processing "${h(d.campaign_name)}"…`, 'info');
+  }
+  if (d.status === 'failed') {
+    addFeedItem(d, 'fail');
+    toast(`❌ "${h(d.campaign_name)}" failed!`, 'err');
+  }
+}
+
+function updateLocalCampaign(id, patch) {
+  const idx = allCampaigns.findIndex(c => c.campaign_id === id);
+  if (idx !== -1) allCampaigns[idx] = {...allCampaigns[idx], ...patch};
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PHONE MOCKUP
+// ═══════════════════════════════════════════════════════════════════
+function renderPhoneBubble(d, animate) {
+  if (!d || !d.generated_text || !d.image_url) return;
+  if (animate && shownInPhone.has(d.campaign_id)) return;
+  shownInPhone.add(d.campaign_id);
+
+  ['pName','pName2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=d.campaign_name; });
+  ['pNum','pNum2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=d.phone; });
+
+  const bodies = ['pBody','pBody2'].map(id => document.getElementById(id)).filter(Boolean);
+
+  if (!animate) {
+    // Instant replay — no typing animation
+    const ts = '(replayed)';
+    bodies.forEach(body => appendBubble(body, d, ts));
+    return;
+  }
+
+  // Typing animation → real bubble
+  const typId = 'typ_' + Date.now();
+  bodies.forEach(body => {
+    body.insertAdjacentHTML('beforeend',
+      `<div class="bw in" id="${typId}_${body.id}">
+         <div class="typing-bub"><div class="dots"><span></span><span></span><span></span></div></div>
+       </div>`);
+    body.scrollTop = body.scrollHeight;
+  });
+
+  setTimeout(() => {
+    const ts = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    bodies.forEach(body => {
+      const el = document.getElementById(`${typId}_${body.id}`);
+      if (el) el.remove();
+      appendBubble(body, d, ts);
+    });
+    // "Seen" reply after 1s
+    setTimeout(() => {
+      const ts2 = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      bodies.forEach(body => {
+        body.insertAdjacentHTML('beforeend',
+          `<div class="bw out">
+             <div class="bubble out">👀 Seen</div>
+             <div class="bt">${ts2}</div>
+           </div>`);
+        body.scrollTop = body.scrollHeight;
+      });
+    }, 900);
+  }, 1800);
+}
+
+function appendBubble(body, d, ts) {
+  const preview = d.generated_text.length > 220
+    ? d.generated_text.slice(0,220) + '…' : d.generated_text;
+  const wrap = document.createElement('div');
+  wrap.className = 'bw in';
+  const bub = document.createElement('div');
+  bub.className = 'bubble in';
+  bub.style.cursor = 'pointer';
+  bub.innerHTML = `<strong>📣 ${h(d.campaign_name)}</strong><br><br>${h(preview)}`;
+  bub.onclick = () => openModal(d.campaign_id);
+  const img = document.createElement('img');
+  img.src = d.image_url;
+  img.alt = 'Campaign image';
+  img.onerror = () => { img.style.display='none'; };
+  img.onclick = e => { e.stopPropagation(); openModal(d.campaign_id); };
+  bub.appendChild(img);
+  const bt = document.createElement('div');
+  bt.className = 'bt';
+  bt.textContent = ts + ' · Delivered ✓✓';
+  wrap.appendChild(bub);
+  wrap.appendChild(bt);
+  body.appendChild(wrap);
+  body.scrollTop = body.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CAMPAIGN CRUD
+// ═══════════════════════════════════════════════════════════════════
+async function createCampaign() {
+  const name  = document.getElementById('fName').value.trim();
+  const prmp  = document.getElementById('fPrompt').value.trim();
+  const phone = document.getElementById('fPhone').value.trim();
+  const raw   = document.getElementById('fTime').value;
+
+  hideFormMsg();
+
+  if (!name || !prmp || !phone || !raw) {
+    showFormMsg('err','⚠ Please fill in all fields.'); return;
+  }
+  if (!/^\+[0-9]{7,15}$/.test(phone)) {
+    showFormMsg('err','⚠ Phone must be E.164 format, e.g. +8801913828774'); return;
+  }
+
+  const schedTime = raw.replace('T',' ') + ':00';
+  const btn = document.getElementById('subBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⏳</span> Scheduling…';
+
+  try {
+    const res = await fetch('/campaigns', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({campaign_name:name, prompt:prmp, phone, schedule_time:schedTime}),
+    });
+    const json = await res.json();
+    if (res.ok) {
+      showFormMsg('ok', `✅ Campaign #${json.campaign_id} scheduled — dispatches at ${schedTime}`);
+      document.getElementById('fName').value = '';
+      document.getElementById('fPrompt').value = '';
+      document.getElementById('fPhone').value = '';
+      updateChar('fName','charName',255);
+      updateChar('fPrompt','charPrompt',2000);
+      prefillTime();
+      await loadCampaigns();
+      toast(`Campaign #${json.campaign_id} scheduled!`, 'ok');
+    } else {
+      const detail = Array.isArray(json.detail)
+        ? json.detail.map(e => e.msg || e.message || JSON.stringify(e)).join(', ')
+        : String(json.detail || 'Unknown error');
+      showFormMsg('err', '❌ ' + detail);
+    }
+  } catch(e) {
+    showFormMsg('err', '❌ Network error — is the server running?');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📤 Schedule Campaign';
+  }
+}
+
+async function loadCampaigns() {
+  try {
+    const res = await fetch('/campaigns');
+    if (!res.ok) return;
+    const list = await res.json();
+    allCampaigns = Array.isArray(list) ? list : [];
+    updateStats();
+    renderDashTable();
+    if (currentTab === 'campaigns') renderCampTable();
+  } catch(_) {}
+}
+
+async function loadSentMessages() {
+  try {
+    const res = await fetch('/campaigns/sent');
+    if (!res.ok) return;
+    const list = await res.json();
+    renderMsgList(Array.isArray(list) ? list : []);
+    // Update cache
+    (Array.isArray(list) ? list : []).forEach(c => {
+      if (c.generated_text && c.image_url) {
+        dispatchCache[c.campaign_id] = {
+          campaign_id:c.campaign_id, campaign_name:c.campaign_name,
+          phone:c.phone, generated_text:c.generated_text, image_url:c.image_url
+        };
+      }
+    });
+  } catch(_) {}
+}
+
+function promptDelete(id) {
+  const c = allCampaigns.find(x => x.campaign_id === id);
+  if (!c) return;
+  pendingDeleteId = id;
+  document.getElementById('confirmMsg').textContent =
+    `Delete campaign #${id} "${c.campaign_name}"? This cannot be undone.`;
+  document.getElementById('confirmDlg').classList.add('open');
+}
+
+async function executeDelete() {
+  if (!pendingDeleteId) return;
+  const id = pendingDeleteId;
+  closeConfirm();
+  try {
+    const res = await fetch(`/campaigns/${id}`, {method:'DELETE'});
+    if (res.status === 200 || res.status === 204) {
+      allCampaigns = allCampaigns.filter(c => c.campaign_id !== id);
+      updateStats();
+      renderDashTable();
+      if (currentTab === 'campaigns') renderCampTable();
+      toast(`Campaign #${id} deleted.`, 'ok');
+    } else if (res.status === 409) {
+      const j = await res.json();
+      toast(j.detail || 'Cannot delete this campaign.', 'err');
+    } else {
+      toast('Failed to delete campaign.', 'err');
+    }
+  } catch(_) {
+    toast('Network error.', 'err');
+  }
+}
+
+function closeConfirm() {
+  pendingDeleteId = null;
+  document.getElementById('confirmDlg').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TABLE RENDERERS
+// ═══════════════════════════════════════════════════════════════════
+function renderDashTable() {
+  const tb = document.getElementById('dashTbl');
+  const recent = [...allCampaigns].reverse().slice(0, 8);
+  if (!recent.length) {
+    tb.innerHTML = '<tr><td colspan="6"><div class="empty-row">No campaigns yet. Create one →</div></td></tr>';
+    return;
+  }
+  tb.innerHTML = recent.map(c => rowHtml(c, false)).join('');
+}
+
+function renderCampTable() {
+  const tb = document.getElementById('campTbl');
+  const filter = document.getElementById('filterStatus').value;
+  const filtered = filter ? allCampaigns.filter(c => c.status === filter) : [...allCampaigns];
+  const sorted = [...filtered].reverse();
+
+  document.getElementById('campCount').textContent =
+    `Showing ${sorted.length} of ${allCampaigns.length} campaign(s)`;
+
+  if (!sorted.length) {
+    tb.innerHTML = `<tr><td colspan="7"><div class="empty-row">No campaigns${filter?' with status "'+filter+'"':''} found.</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = sorted.map(c => rowHtml(c, true)).join('');
+}
+
+function rowHtml(c, detailed) {
+  const sc = String(c.schedule_time || '').replace('T',' ').replace(/\.\d+/,'');
+  const promptPreview = detailed && c.prompt
+    ? `<td style="color:var(--muted);font-size:.77rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${h(c.prompt)}">${h(c.prompt.slice(0,60))}${c.prompt.length>60?'…':''}</td>` : '';
+  const canDel = c.status === 'pending' || c.status === 'failed';
+  const hasSent = c.status === 'sent' && dispatchCache[c.campaign_id];
+  const cols = detailed ? 7 : 6;
+  return `<tr class="row-hover">
+    <td style="color:var(--muted);font-size:.75rem">#${c.campaign_id}</td>
+    <td style="font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${h(c.campaign_name)}">${h(c.campaign_name)}</td>
+    <td style="color:var(--muted);font-size:.78rem">${h(c.phone)}</td>
+    ${promptPreview}
+    <td style="color:var(--muted);font-size:.75rem;white-space:nowrap">${h(sc)}</td>
+    <td><span class="badge ${c.status}">${c.status}</span></td>
+    <td>
+      <div class="action-btns">
+        ${hasSent ? `<button class="icon-btn view" title="View message" onclick="openModal(${c.campaign_id})">👁</button>` : ''}
+        ${canDel  ? `<button class="icon-btn del"  title="Delete campaign" onclick="promptDelete(${c.campaign_id})">🗑</button>` : ''}
+      </div>
+    </td>
+  </tr>`;
+}
+
+function applyFilter() { renderCampTable(); }
+
+// ═══════════════════════════════════════════════════════════════════
+// MESSAGES LIST (Messages Tab)
+// ═══════════════════════════════════════════════════════════════════
+function renderMsgList(list) {
+  const el = document.getElementById('msgList');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-row">No sent messages yet.</div>';
+    return;
+  }
+  el.innerHTML = list.map(c => {
+    const sc = String(c.schedule_time||'').replace('T',' ').replace(/\.\d+/,'');
+    const hasContent = c.generated_text && c.image_url;
+    return `<div class="card" style="padding:14px;cursor:${hasContent?'pointer':'default'}"
+              onclick="${hasContent?`previewInPhone(${c.campaign_id})`:''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="min-width:0">
+          <div style="font-weight:600;font-size:.88rem">${h(c.campaign_name)}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:2px">${h(c.phone)} · ${h(sc)}</div>
+          ${c.generated_text ? `<div style="font-size:.78rem;color:var(--text);margin-top:7px;line-height:1.6">${h(c.generated_text.slice(0,160))}${c.generated_text.length>160?'…':''}</div>` : ''}
+        </div>
+        ${c.image_url ? `<img src="${h(c.image_url)}" alt="preview"
+            style="width:70px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border)"
+            onerror="this.style.display='none'"/>` : ''}
+      </div>
+      ${hasContent ? `<div style="margin-top:9px;display:flex;gap:7px">
+        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openModal(${c.campaign_id})">🔍 Full View</button>
+        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();previewInPhone(${c.campaign_id})">📱 Preview</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function previewInPhone(id) {
+  const d = dispatchCache[id];
+  if (!d) return;
+  // Show in the messages tab phone
+  ['pName2','pName'].forEach(eid => { const el=document.getElementById(eid);if(el)el.textContent=d.campaign_name; });
+  ['pNum2','pNum'].forEach(eid => { const el=document.getElementById(eid);if(el)el.textContent=d.phone; });
+  ['pBody2','pBody'].forEach(eid => {
+    const body = document.getElementById(eid);
+    if (!body) return;
+    body.innerHTML = '';
+    appendBubble(body, d, 'replayed');
+  });
+  toast('Previewed in phone 📱', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('sTot').textContent = allCampaigns.length;
+  document.getElementById('sPen').textContent = allCampaigns.filter(c=>c.status==='pending').length;
+  document.getElementById('sSnt').textContent = allCampaigns.filter(c=>c.status==='sent').length;
+  document.getElementById('sFai').textContent = allCampaigns.filter(c=>c.status==='failed').length;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LIVE FEED
+// ═══════════════════════════════════════════════════════════════════
+function addFeedItem(d, type) {
+  const feed = document.getElementById('feed');
+  const empty = feed.querySelector('.feed-empty');
+  if (empty) empty.remove();
+  const ts = new Date().toLocaleTimeString();
+  const item = document.createElement('div');
+  item.className = `feed-item ${type === 'fail' ? 'fail' : type === 'proc' ? 'proc' : ''}`;
+  const icons = {sent:'📤', fail:'❌', proc:'⚙'};
+  const labels = {sent:'Dispatched', fail:'Failed', proc:'Processing'};
+  item.innerHTML = `<b>${icons[type]||'📤'} ${h(d.campaign_name)}</b>
+    <span>${labels[type]||''} → ${h(d.phone||'')} · ${ts}</span>`;
+  if (type === 'sent') item.onclick = () => openModal(d.campaign_id);
+  feed.insertBefore(item, feed.firstChild);
+  // Keep feed to 50 items
+  while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+}
+
+function clearFeed() {
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '<div class="feed-empty">Feed cleared.</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════════════
+function openModal(id) {
+  const d = dispatchCache[id];
+  if (!d) { toast('Message content not yet available.', 'warn'); return; }
+  document.getElementById('mTitle').textContent = d.campaign_name;
+  document.getElementById('mMeta').textContent  = `Phone: ${d.phone}`;
+  const img  = document.getElementById('mImg');
+  const text = document.getElementById('mText');
+  const url  = document.getElementById('mUrl');
+  if (d.image_url) {
+    img.src = d.image_url;
+    img.style.display = '';
+    url.innerHTML = `<b>Image URL:</b> <a href="${h(d.image_url)}" target="_blank" rel="noopener">${h(d.image_url)}</a>`;
+    url.style.display = '';
+  } else {
+    img.style.display = 'none';
+    url.style.display = 'none';
+  }
+  if (d.generated_text) {
+    text.textContent  = d.generated_text;
+    text.style.display = '';
+  } else {
+    text.style.display = 'none';
+  }
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════════
+function toast(msg, type='info', duration=3500) {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toast-out .3s ease forwards';
+    setTimeout(() => t.remove(), 300);
+  }, duration);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FORM HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function showFormMsg(type, text) {
+  const el = document.getElementById('formMsg');
+  el.className = 'notice ' + type;
+  el.textContent = text;
+}
+function hideFormMsg() {
+  const el = document.getElementById('formMsg');
+  el.className = 'notice'; el.textContent = '';
+}
+function updateChar(inputId, countId, max) {
+  const len = document.getElementById(inputId).value.length;
+  const el  = document.getElementById(countId);
+  el.textContent = len;
+  el.style.color = len > max * .9 ? 'var(--yellow)' : '';
+  if (len >= max) el.style.color = 'var(--red)';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════════════════════
+function tickClock() {
+  const d = new Date();
+  const t = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  ['ptime','ptime2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=t; });
+}
+const pad = n => String(n).padStart(2,'0');
+setInterval(tickClock, 15000);
+tickClock();
+
+// ═══════════════════════════════════════════════════════════════════
+// HTML ESCAPE
+// ═══════════════════════════════════════════════════════════════════
+function h(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TIME PREFILL
+// ═══════════════════════════════════════════════════════════════════
+function prefillTime() {
+  const d   = new Date(Date.now() + 2 * 60 * 1000);
+  const str = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  document.getElementById('fTime').value = str;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTO-REFRESH + INIT
+// ═══════════════════════════════════════════════════════════════════
+setInterval(loadCampaigns, 15000);   // poll every 15s
+
+prefillTime();
+connectWS();
+loadCampaigns();
+</script>
+</body>
+</html>
