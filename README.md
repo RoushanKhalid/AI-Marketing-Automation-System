@@ -2,7 +2,13 @@
 
 A Python backend that creates, schedules, and auto-dispatches AI-generated marketing campaigns.
 
-- **Text generation** — Groq API (`llama3-8b-8192`, free tier)
+## 📱 Web UI Interface Previews
+
+| Dashboard Overview | Campaigns Table | Live Preview & Mockup |
+| :---: | :---: | :---: |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Campaigns List](docs/screenshots/campaigns.png) | ![Live Preview Messages](docs/screenshots/messages.png) |
+
+- **Text generation** — Groq API (`llama-3.1-8b-instant`, free tier)
 - **Image generation** — Pollinations.AI (free, no key needed)
 - **Storage** — SQLite (zero setup, file-based)
 - **API** — FastAPI with auto-generated Swagger docs
@@ -12,7 +18,7 @@ A Python backend that creates, schedules, and auto-dispatches AI-generated marke
 
 ## Prerequisites
 
-- Python 3.10 or higher
+- Python 3.10 or higher (or Docker Desktop installed)
 - A free [Groq API key](https://console.groq.com) (already included in `.env`)
 
 ---
@@ -59,12 +65,23 @@ SCHEDULER_INTERVAL_SECONDS=30
 
 ## Run the Application
 
+### Option A: Running natively with Python
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
+### Option B: Running with Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+The application and database volume will start up together.
+
 The API starts at **http://localhost:8000**
 
+- **Web UI** (dashboard): http://localhost:8000
 - **Swagger UI** (interactive docs): http://localhost:8000/docs
 - **ReDoc** (reference docs): http://localhost:8000/redoc
 

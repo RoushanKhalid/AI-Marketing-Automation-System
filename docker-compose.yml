@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: marketing_automation_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - app-data:/data
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  app-data:
+    driver: local
