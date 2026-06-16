@@ -59,6 +59,8 @@ GROQ_API_KEY=your_groq_api_key_here
 # Optional overrides (defaults shown)
 DB_PATH=campaigns.db
 SCHEDULER_INTERVAL_SECONDS=30
+# Timezone for Docker container logs, e.g. GMT+6:
+TZ=Asia/Dhaka
 ```
 
 ---
@@ -76,6 +78,10 @@ uvicorn app.main:app --reload
 ```bash
 docker-compose up --build
 ```
+
+### Option C: One-click Docker startup on Windows
+
+Double-click `docker-start.bat` to build and run the app using Docker Compose.
 
 The application and database volume will start up together.
 

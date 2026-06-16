@@ -26,28 +26,46 @@ if not exist ".env" (
     exit /b 1
 )
 
+:: ── Clear port 8000 if already in use ──────────────────────────────
+echo  [1/5] Clearing port 8000 if occupied...
+set "PORT_KILLED=0"
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr /R /C:":8000 .*LISTENING"') do (
+    echo  [WARN] Found process %%p listening on port 8000.
+    taskkill /PID %%p /F >nul 2>&1
+    if errorlevel 1 (
+        echo  [ERROR] Could not stop PID %%p. Please free port 8000 manually.
+        pause
+        exit /b 1
+    )
+    set "PORT_KILLED=1"
+)
+if "%PORT_KILLED%"=="1" (
+    echo  [OK] Port 8000 cleared.
+) else (
+    echo  [OK] Port 8000 is free.
+)
+
 :: ── Install / verify dependencies ─────────────────────────────────
-echo  [1/4] Installing dependencies...
+echo  [2/5] Installing dependencies...
 python -m pip install -r requirements.txt --quiet
 if errorlevel 1 (
     echo  [WARN] pip reported issues - attempting to continue...
 )
 
 :: ── Clear compiled bytecode so new code always runs ───────────────
-echo  [2/4] Clearing cached bytecode...
+echo  [3/5] Clearing cached bytecode...
 for /d /r "app" %%d in (__pycache__) do (
     if exist "%%d" rmdir /s /q "%%d" 2>nul
 )
 
 :: ── Launch ────────────────────────────────────────────────────────
-echo  [3/4] Starting server...
-echo  [4/4] Opening browser in 3 seconds...
+echo  [4/5] Starting server...
+echo  [5/5] Opening browser in 3 seconds...
 echo.
 echo  ============================================================
 echo   Server  : http://localhost:8000
 echo   Web UI  : http://localhost:8000
 echo   API Docs: http://localhost:8000/docs
-echo   Model   : llama-3.1-8b-instant (Groq)
 echo  ============================================================
 echo.
 

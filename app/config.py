@@ -7,7 +7,9 @@ Raises EnvironmentError at import time if any required key is missing.
 """
 
 import os
+from datetime import datetime
 from dotenv import load_dotenv
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 # Load .env from the project root (two levels up from this file)
 load_dotenv()
@@ -24,6 +26,7 @@ class Config:
     SCHEDULER_INTERVAL_SECONDS: int = int(
         os.getenv("SCHEDULER_INTERVAL_SECONDS", "30")
     )
+    TZ: str = os.getenv("TZ", "UTC").strip() or "UTC"
 
     @classmethod
     def validate(cls) -> None:
@@ -42,6 +45,25 @@ class Config:
                 "Please set it in your .env file or as an environment variable."
             )
 
+        try:
+            cls.get_timezone()
+        except ZoneInfoNotFoundError as exc:
+            from app.logger import get_logger
+            logger = get_logger("app.config")
+            logger.warning(
+                "Invalid timezone %r in TZ. Falling back to UTC.", cls.TZ
+            )
+            cls.TZ = "UTC"
+
+    @classmethod
+    def get_timezone(cls) -> ZoneInfo:
+        """Return a ZoneInfo instance for the configured TZ."""
+        return ZoneInfo(cls.TZ)
+
+    @classmethod
+    def now(cls) -> datetime:
+        """Return the current time in the configured timezone."""
+        return datetime.now(cls.get_timezone())
 
 # Eagerly validate so the app fails fast at startup if misconfigured
 Config.validate()

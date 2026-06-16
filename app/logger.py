@@ -11,8 +11,12 @@ Usage:
 """
 
 import logging
+import os
 import sys
+import time
+from datetime import datetime
 from logging.handlers import RotatingFileHandler
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 _LOG_FORMAT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 _DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -21,6 +25,16 @@ _MAX_BYTES = 5 * 1024 * 1024  # 5 MB
 _BACKUP_COUNT = 3
 
 _configured = False
+
+
+def _localtime_converter(timestamp: float) -> time.struct_time:
+    tz_name = os.getenv("TZ", "UTC")
+    try:
+        zone = ZoneInfo(tz_name)
+        dt = datetime.fromtimestamp(timestamp, tz=zone)
+        return dt.timetuple()
+    except ZoneInfoNotFoundError:
+        return time.localtime(timestamp)
 
 
 def _configure_root_logger() -> None:
@@ -33,6 +47,7 @@ def _configure_root_logger() -> None:
     root.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter(_LOG_FORMAT, datefmt=_DATE_FORMAT)
+    formatter.converter = _localtime_converter
 
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)

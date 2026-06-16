@@ -15,6 +15,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, Literal, Optional, Any
 
+from app.config import Config
 from pydantic import BaseModel, Field, field_validator, field_serializer
 
 
@@ -40,7 +41,7 @@ class CampaignCreate(BaseModel):
     )
     schedule_time: datetime = Field(
         ...,
-        description="UTC datetime when the campaign should be dispatched.",
+        description="Datetime in the configured TZ when the campaign should be dispatched.",
     )
     status: Literal["pending", "processing", "sent", "failed"] = Field(
         default="pending",
@@ -60,10 +61,13 @@ class CampaignCreate(BaseModel):
     def validate_schedule_time_format(cls, value: Any) -> datetime:
         """Enforce strict YYYY-MM-DD HH:MM:SS format validation for input string."""
         if isinstance(value, datetime):
+            if value.tzinfo is None:
+                return value.replace(tzinfo=Config.get_timezone())
             return value
         if isinstance(value, str):
             try:
-                return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+                naive_dt = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+                return naive_dt.replace(tzinfo=Config.get_timezone())
             except ValueError as exc:
                 raise ValueError(
                     "schedule_time must be in the format 'YYYY-MM-DD HH:MM:SS'."

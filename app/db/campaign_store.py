@@ -17,6 +17,7 @@ import threading
 from datetime import datetime
 from typing import Optional
 
+from app.config import Config
 from app.logger import get_logger
 from app.models.campaign import CampaignCreate, CampaignRecord
 
@@ -93,12 +94,14 @@ class CampaignStore:
     @staticmethod
     def _row_to_record(row: sqlite3.Row) -> CampaignRecord:
         keys = row.keys()
+        naive_dt = datetime.strptime(row["schedule_time"], "%Y-%m-%d %H:%M:%S")
+        aware_dt = naive_dt.replace(tzinfo=Config.get_timezone())
         return CampaignRecord(
             campaign_id=row["campaign_id"],
             campaign_name=row["campaign_name"],
             prompt=row["prompt"],
             phone=row["phone"],
-            schedule_time=datetime.strptime(row["schedule_time"], "%Y-%m-%d %H:%M:%S"),
+            schedule_time=aware_dt,
             status=row["status"],
             generated_text=row["generated_text"] if "generated_text" in keys else None,
             image_url=row["image_url"] if "image_url" in keys else None,
@@ -138,7 +141,9 @@ class CampaignStore:
         """Insert a new campaign and return it with its assigned campaign_id."""
         self._validate_campaign_record(campaign)
 
-        schedule_str = campaign.schedule_time.strftime("%Y-%m-%d %H:%M:%S")
+        schedule_str = campaign.schedule_time.astimezone(Config.get_timezone()).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         status = campaign.status or "pending"
         sql = """
         INSERT INTO campaigns (campaign_name, prompt, phone, schedule_time, status)
@@ -279,7 +284,7 @@ class CampaignStore:
 
     def get_due_campaigns(self) -> list[CampaignRecord]:
         """Return pending campaigns whose scheduled time has arrived."""
-        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now_str = Config.now().strftime("%Y-%m-%d %H:%M:%S")
         sql = """
         SELECT * FROM campaigns
         WHERE status = 'pending'
